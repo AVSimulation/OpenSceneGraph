@@ -501,7 +501,7 @@ ENDIF()
 
 
 OPTION(OSG_GL_LIBRARY_STATIC "Set to ON to statically link with OpenGL/GLES library." OFF)
-OPTION(OSG_EGL "Set to ON to use EGL with OpenGL library." ON)
+OPTION(OSG_EGL "Set to ON to use EGL with OpenGL library." OFF)
 
 IF (OSG_BUILD_PLATFORM_IPHONE OR ANDROID)
     OPTION(OSG_TEXT_USE_FONTCONFIG "Set to ON to enable attempt to use FontConfig in osgText." OFF)
