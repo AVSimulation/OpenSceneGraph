@@ -1,0 +1,103 @@
+/* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2009 Robert Osfield 
+ *
+ * This library is open source and may be redistributed and/or modified under  
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or 
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the openscenegraph.org website.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * OpenSceneGraph Public License for more details.
+*/
+
+#ifndef OSGVIEWER_GRAPHICSHANDLEEGL
+#define OSGVIEWER_GRAPHICSHANDLEEGL 1
+
+#include <osgViewer/Export>
+
+
+#define EGL_EGLEXT_PROTOTYPES
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+namespace osgViewer
+{
+
+/** Class to encapsulate platform-specific OpenGL context handle variables.
+  * Derived osg::GraphicsContext classes can inherit from this class to
+  * share OpenGL resources.*/
+
+class OSGVIEWER_EXPORT GraphicsHandleEGL
+{
+    public:
+    
+        GraphicsHandleEGL():
+            _display(0),
+            _context(0) 
+	{
+		eglQueryDevicesEXT = (PFNEGLQUERYDEVICESEXTPROC) eglGetProcAddress("eglQueryDevicesEXT");
+		eglGetPlatformDisplayEXT = (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
+	}
+
+
+	EGLDisplay openDisplay()
+        {
+		if (eglQueryDevicesEXT && eglGetPlatformDisplayEXT)
+		{
+    			static const int MAX_DEVICES = 16;
+    			EGLDeviceEXT devices[MAX_DEVICES];
+    			EGLint numDevices;
+
+    			eglQueryDevicesEXT(MAX_DEVICES, devices, &numDevices);
+
+			int dev = 0;
+
+			char * envdev = getenv("OSG_EGL_DEV");
+			if (envdev)
+				dev = atoi(envdev);
+
+    			printf("OSG EGL Using device : %d/%d\n", dev, numDevices);
+
+    			return eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[dev], 0);
+		}
+		else
+		{
+			return eglGetDisplay(EGL_DEFAULT_DISPLAY);
+		}
+
+        }
+
+        /** Set X11 display.*/        
+        inline void setDisplay(EGLDisplay display) { _display = display; }
+
+        /** Get X11 display.*/        
+        inline EGLDisplay getDisplay() const { return _display; }
+
+        typedef EGLContext Context;
+        typedef EGLSurface Pbuffer;
+        typedef EGLSurface Window;
+        typedef EGLDisplay Display;
+
+        /** Set native OpenGL graphics context.*/
+        inline void setContext(Context context) { _context = context; }
+
+        /** Get native OpenGL graphics context.*/        
+        inline Context getContext() const { return _context; }
+
+    protected:
+        
+        Display         _display;
+        Context         _context;
+
+	PFNEGLQUERYDEVICESEXTPROC eglQueryDevicesEXT;
+	PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT;
+};
+
+bool checkEGLError(const char* str);
+
+}
+
+#endif
