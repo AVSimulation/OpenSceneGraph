@@ -10,6 +10,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
 #include <osg/Version>
+#include <osg/CullFace>
 #include <osgDB/ConvertUTF>
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
@@ -373,6 +374,7 @@ ReaderWriterFBX::readNode(const std::string& filenameInit,
                 osg::Node* osgNode = res.getNode();
                 osgNode->getOrCreateStateSet()->setMode(GL_RESCALE_NORMAL,osg::StateAttribute::ON);
                 osgNode->getOrCreateStateSet()->setMode(GL_NORMALIZE,osg::StateAttribute::ON);
+                osgNode->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
 
                 if (reader.pAnimationManager.valid())
                 {
@@ -574,7 +576,7 @@ osgDB::ReaderWriter::WriteResult ReaderWriterFBX::writeNode(
         FbxExporter* lExporter = FbxExporter::Create(pSdkManager, "");
 
         // default axis system is openGL
-        FbxAxisSystem::EPreDefinedAxisSystem axisSystem = FbxAxisSystem::eOpenGL;
+        FbxAxisSystem::EPreDefinedAxisSystem axisSystem = FbxAxisSystem::eMax;
 
         // check options
         if (options)
@@ -598,8 +600,10 @@ osgDB::ReaderWriter::WriteResult ReaderWriterFBX::writeNode(
                  axisSystem = FbxAxisSystem::eLightwave;
            }
         }
-
         pScene->GetGlobalSettings().SetAxisSystem(axisSystem);
+        pScene->GetGlobalSettings().SetOriginalUpAxis(FbxAxisSystem::Max);
+        pScene->GetGlobalSettings().SetSystemUnit(FbxSystemUnit::m);
+        pScene->GetGlobalSettings().SetOriginalSystemUnit(FbxSystemUnit::m);
 
         // Ensure the directory exists or else the FBX SDK will fail
         if (!osgDB::makeDirectoryForFile(filename)) {

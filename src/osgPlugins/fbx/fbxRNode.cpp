@@ -526,6 +526,21 @@ osgDB::ReaderWriter::ReadResult OsgFbxReader::readFbxNode(
             }
             else if (osg::Node* node = meshRes.getNode())
             {
+                FbxProperty currentProp = pNode->GetFirstProperty();
+                FbxString typeName = pNode->GetTypeName();
+                while (currentProp.IsValid())
+                {
+                    if (currentProp.GetFlag(FbxPropertyFlags::eUserDefined))
+                    {
+                        FbxString value = currentProp.Get<FbxString>();
+                        std::string desc = std::string(value.Buffer());
+
+                        node->addDescription(desc);
+
+                    }
+                    currentProp = pNode->GetNextProperty(currentProp);
+                }
+
                 bEmpty = false;
 
                 if (bindMatrixCount != boneBindMatrices.size())
@@ -582,6 +597,20 @@ osgDB::ReaderWriter::ReadResult OsgFbxReader::readFbxNode(
     }
 
     if (!osgGroup) osgGroup = createGroupNode(pSdkManager, pNode, animName, localMatrix, bIsBone, nodeMap, fbxScene);
+
+    FbxProperty currentProp = pNode->GetFirstProperty();
+    FbxString typeName = pNode->GetTypeName();
+    while (currentProp.IsValid())
+    {
+        if (currentProp.GetFlag(FbxPropertyFlags::eUserDefined))
+        {
+            FbxString value = currentProp.Get<FbxString>();
+            std::string desc = std::string(value.Buffer());
+
+            osgGroup->addDescription(desc);
+        }
+        currentProp = pNode->GetNextProperty(currentProp);
+    }
 
     osg::Group* pAddChildrenTo = osgGroup.get();
     if (bCreateSkeleton)

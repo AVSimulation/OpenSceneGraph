@@ -20,6 +20,7 @@
 #include <osg/PrimitiveSet>
 #include <osgDB/FileUtils>
 #include <osgDB/WriteFile>
+#include <math.h>
 #include "WriterNodeVisitor.h"
 
 
@@ -343,7 +344,8 @@ WriterNodeVisitor::Material::Material(WriterNodeVisitor& writerNodeVisitor,
                 specular.y(),
                 specular.z()));
 
-            _fbxMaterial->Shininess.Set(shininess);
+            double gloss = pow(10, (shininess * 5.0 * log(2.0)) / 64.0);
+            _fbxMaterial->Shininess.Set(gloss);
         }
     }
     if (tex && tex->getImage(0))
@@ -351,10 +353,11 @@ WriterNodeVisitor::Material::Material(WriterNodeVisitor& writerNodeVisitor,
         _osgImage = tex->getImage(0);
 
         std::string relativePath;
-        externalWriter.write(*_osgImage, options, NULL, &relativePath);
+        std::string absPath;
+        externalWriter.write(*_osgImage, options, &absPath, &relativePath);
 
         _fbxTexture = FbxFileTexture::Create(pSdkManager, relativePath.c_str());
-        _fbxTexture->SetFileName(relativePath.c_str());
+        _fbxTexture->SetFileName(absPath.c_str());
         // Create a FBX material if needed
         if (!_fbxMaterial)
         {
