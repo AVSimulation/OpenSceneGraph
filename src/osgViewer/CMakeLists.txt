@@ -5,9 +5,6 @@ ELSE()
     ADD_DEFINITIONS(-DOSG_LIBRARY_STATIC)
 ENDIF()
 
-IF(OSG_EGL)
-    ADD_DEFINITIONS(-DOSG_EGL)
-ENDIF()
 
 SET(LIB_NAME osgViewer)
 
@@ -189,40 +186,25 @@ ELSEIF(${OSG_WINDOWING_SYSTEM} STREQUAL "X11")
         SET(OSGVIEWER_USE_XINERAMA OFF)
     ENDIF()
 	
-	IF(OSG_EGL)
+	SET(TARGET_H_NO_MODULE_INSTALL
+		${HEADER_PATH}/api/X11/GraphicsHandleX11
+		${HEADER_PATH}/api/X11/GraphicsWindowX11
+		${HEADER_PATH}/api/X11/PixelBufferX11
+	)
 
-		SET(TARGET_H_NO_MODULE_INSTALL
-      	    ${HEADER_PATH}/api/EGL/GraphicsHandleEGL
-            ${HEADER_PATH}/api/EGL/GraphicsWindowEGL
-            ${HEADER_PATH}/api/EGL/PixelBufferEGL
-        )
+	SET(LIB_COMMON_FILES ${LIB_COMMON_FILES}
+		GraphicsWindowX11.cpp
+		PixelBufferX11.cpp
+	)
 
-        SET(LIB_COMMON_FILES ${LIB_COMMON_FILES} 
-            GraphicsWindowEGL.cpp 
-            PixelBufferEGL.cpp
-        )
+	IF(OSGVIEWER_USE_XRANDR)
+		ADD_DEFINITIONS(-DOSGVIEWER_USE_XRANDR)
+		SET(LIB_PRIVATE_HEADERS ${LIB_PRIVATE_HEADERS} ${XRANDR_INCLUDE_DIRS} )
 
-	ELSE()
-		SET(TARGET_H_NO_MODULE_INSTALL
-			${HEADER_PATH}/api/X11/GraphicsHandleX11
-			${HEADER_PATH}/api/X11/GraphicsWindowX11
-			${HEADER_PATH}/api/X11/PixelBufferX11
-		)
-
-		SET(LIB_COMMON_FILES ${LIB_COMMON_FILES}
-			GraphicsWindowX11.cpp
-			PixelBufferX11.cpp
-		)
-
-		IF(OSGVIEWER_USE_XRANDR)
-			ADD_DEFINITIONS(-DOSGVIEWER_USE_XRANDR)
-			SET(LIB_PRIVATE_HEADERS ${LIB_PRIVATE_HEADERS} ${XRANDR_INCLUDE_DIRS} )
-
-			IF(X11_Xrandr_LIB)
-				SET(LIB_EXTRA_LIBS ${X11_Xrandr_LIB} ${LIB_EXTRA_LIBS})
-			ELSE()
-				SET(LIB_EXTRA_LIBS ${XRANDR_LIBRARIES} ${LIB_EXTRA_LIBS})
-			ENDIF()
+		IF(X11_Xrandr_LIB)
+			SET(LIB_EXTRA_LIBS ${X11_Xrandr_LIB} ${LIB_EXTRA_LIBS})
+		ELSE()
+			SET(LIB_EXTRA_LIBS ${XRANDR_LIBRARIES} ${LIB_EXTRA_LIBS})
 		ENDIF()
 	ENDIF()
 
@@ -274,6 +256,8 @@ ENDIF()
 
 SETUP_LIBRARY(${LIB_NAME})
 
+
+
 # install these headers manually since setup_library and moduleinstall
 # wouldn't keep the structure, e.g. api/X11/xyz.h
 FOREACH(HEADERFILE ${TARGET_H_NO_MODULE_INSTALL} ${CONFIG_HEADER_FILES})
@@ -286,6 +270,32 @@ FOREACH(HEADERFILE ${TARGET_H_NO_MODULE_INSTALL} ${CONFIG_HEADER_FILES})
     COMPONENT libopenscenegraph-dev
   )
 ENDFOREACH()
+
+
+###Add Compile EGL version of the library
+IF(OSG_EGL)
+        ADD_DEFINITIONS(-DOSG_EGL)
+
+	SET(TARGET_H_NO_MODULE_INSTALL
+          ${HEADER_PATH}/api/EGL/GraphicsHandleEGL
+          ${HEADER_PATH}/api/EGL/GraphicsWindowEGL
+          ${HEADER_PATH}/api/EGL/PixelBufferEGL
+        )
+
+	LIST(REMOVE_ITEM LIB_COMMON_FILES GraphicsWindowX11.cpp PixelBufferX11.cpp)
+
+        SET(LIB_COMMON_FILES ${LIB_COMMON_FILES} 
+          GraphicsWindowEGL.cpp 
+          PixelBufferEGL.cpp
+        )
+
+	SET(TARGET_SRC
+	    ${LIB_PRIVATE_HEADERS}
+	    ${LIB_COMMON_FILES}
+	)
+	SET(LIB_NAME osgViewerEGL)
+	SETUP_LIBRARY(${LIB_NAME})
+ENDIF(OSG_EGL)
 
 # for structure in ide
 SOURCE_GROUP("${HEADERS_GROUP}\\api" FILES ${TARGET_H_NO_MODULE_INSTALL})
