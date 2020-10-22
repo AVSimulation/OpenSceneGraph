@@ -605,6 +605,7 @@ unsigned int Image::computeNumComponents(GLenum pixelFormat)
         case(GL_RG32I): return 2;
         case(GL_RG32UI): return 2;
         case(GL_RGB): return 3;
+        case(GL_RGB8): return 3;
         case(GL_BGR): return 3;
         case(GL_RGB8I_EXT): return 3;
         case(GL_RGB8UI_EXT): return 3;
