@@ -276,7 +276,7 @@ ReaderWriterFBX::readNode(const std::string& filenameInit,
             bool useFbxRoot = false;
             bool lightmapTextures = false;
             bool tessellatePolygons = false;
-            bool zUp = false;
+            bool zUp = true;
             if (options)
             {
                 std::istringstream iss(options->getOptionString());
@@ -297,7 +297,7 @@ ReaderWriterFBX::readNode(const std::string& filenameInit,
                     }
                     if (opt == "ZUp")
                     {
-                        zUp = true;
+                        zUp = false;
                     }
                 }
             }
