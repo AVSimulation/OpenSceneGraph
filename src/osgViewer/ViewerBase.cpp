@@ -79,7 +79,7 @@ void ViewerBase::viewerBaseInit()
 
     osg::getEnvVar("OSG_RUN_MAX_FRAME_RATE", _runMaxFrameRate);
 
-    _useConfigureAffinity = true;
+    _useConfigureAffinity = false;
 }
 
 void ViewerBase::configureAffinity()
