@@ -249,6 +249,9 @@ DrawElementsUShort::~DrawElementsUShort()
 
 void DrawElementsUShort::draw(State& state, bool useVertexBufferObjects) const
 {
+    if (empty())
+        return;
+
     GLenum mode = _mode;
     #if defined(OSG_GLES1_AVAILABLE) || defined(OSG_GLES2_AVAILABLE) || defined(OSG_GLES3_AVAILABLE)
         if (mode==GL_POLYGON) mode = GL_TRIANGLE_FAN;
@@ -274,8 +277,9 @@ void DrawElementsUShort::draw(State& state, bool useVertexBufferObjects) const
     }
     else
     {
-        if (_numInstances>=1) state.glDrawElementsInstanced(mode, size(), GL_UNSIGNED_SHORT, &front(), _numInstances);
+        if (_numInstances >= 1) state.glDrawElementsInstanced(mode, size(), GL_UNSIGNED_SHORT, &front(), _numInstances);
         else glDrawElements(mode, size(), GL_UNSIGNED_SHORT, &front());
+
     }
 }
 
