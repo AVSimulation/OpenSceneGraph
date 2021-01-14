@@ -295,7 +295,7 @@ ReaderWriterFBX::readNode(const std::string& filenameInit,
                     {
                         tessellatePolygons = true;
                     }
-                    if (opt == "ZUp")
+                    if (opt == "YUp")
                     {
                         zUp = false;
                     }
@@ -403,7 +403,7 @@ ReaderWriterFBX::readNode(const std::string& filenameInit,
                
                 if (zUp)
                 {
-                    if (eUp != FbxAxisSystem::eZAxis || fSign != 1.0  || upSign != 1.0)
+                    if (eUp != FbxAxisSystem::eZAxis || fSign != -1.0  || upSign != 1.0)
                     {                    
                         switch (eUp)
                         {
@@ -601,7 +601,7 @@ osgDB::ReaderWriter::WriteResult ReaderWriterFBX::writeNode(
            }
         }
         pScene->GetGlobalSettings().SetAxisSystem(axisSystem);
-        pScene->GetGlobalSettings().SetOriginalUpAxis(FbxAxisSystem::Max);
+        pScene->GetGlobalSettings().SetOriginalUpAxis(axisSystem);
         pScene->GetGlobalSettings().SetSystemUnit(FbxSystemUnit::m);
         pScene->GetGlobalSettings().SetOriginalSystemUnit(FbxSystemUnit::m);
 
